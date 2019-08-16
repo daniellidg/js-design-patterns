@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+	<header>
+		<meta charset="utf-8">
+		<title>迭代器模式: 根据不同的浏览器获取相应的上传组件对象</title>
+	</header>
+
+	<body>
+
+	</body>
+
+	<script type="text/javascript">
+		var getActiveUploadObj = function() {
+			// IE上传控件
+			try {
+				return new ActiveXObject("TXFINActiveX.FINUpload");
+			} catch (e) {
+				return false;
+			}
+		}
+
+		var getFlashUploadObj = function() {
+			// Flash上传
+			if (supportFlash()) {
+				var str = '<object type="application/x-shockwave-flash"></object>';
+				return $(str).appendTo($('body'));
+			}
+			return false;
+		}
+
+		var getFormUploadObj = function() {
+			// 表单上传
+			var str = '<input name="file" type="file" class="ui-file" />';
+			return $(str).appendTo($('body'));
+		}
+
+		var getWebkitUploadObj = function () {
+			// 具体代码省略
+		}
+
+		var getHtml5UploadObj = function () {
+			// 具体代码省略
+		}
+
+		// 迭代器
+		var iteratorUploadObj = function() {
+			for (let i = 0, l = arguments.length; i < l; i++) {
+				let fn = arguments[i];
+				let uploadObj = fn();
+				if (uploadObj != false) {
+					return uploadObj;
+				}
+			} 
+		}
+
+		var uploadObj = iteratorUploadObj(getActiveUploadObj, getFlashUploadObj, getFormUploadObj, getWebkitUploadObj, getHtml5UploadObj);
+	</script> 
+</html>

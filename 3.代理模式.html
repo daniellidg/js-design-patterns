@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+	<header>
+		<meta charset="utf-8">
+		<title>代理模式: 高阶函数实现缓存代理</title>
+	</header>
+
+	<body>
+
+	</body>
+
+	<script type="text/javascript">
+		/*********************计算乘积*********************/
+		var mult = function() {
+			let a = 1;
+			for (let i = 0, l = arguments.length; i < l; i++) {
+				a = a * arguments[i];
+			}
+			return a;
+		}
+
+		/*********************计算求和*********************/
+		var plus = function() {
+			let a = 0;
+			for (let i = 0, l = arguments.length; i < l; i++) {
+				a = a + arguments[i];
+			}
+			return a;
+		}
+
+
+		/*********************创建缓存代理工厂*********************/
+		var createProxyFactory = function(fn) {
+			let cache = {};
+			return function() {
+				let args = Array.prototype.join.call(arguments, ',');
+				if (args in cache) {
+					return cache[args];
+				}
+
+				return cache[args] = fn.apply(this, arguments);
+			}
+		}
+
+		let proxyPlus = createProxyFactory(plus);
+		let proxyMult = createProxyFactory(mult);
+		console.log(proxyPlus(1, 2, 3, 4));
+		console.log(proxyPlus(1, 2, 3, 4));
+		console.log(proxyMult(1, 2, 3, 4));
+		console.log(proxyMult(1, 2, 3, 4));
+	</script>
+</html>

@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+	<header>
+		<meta charset="utf-8">
+		<title>职责链模式: 文件上传</title>
+	</header>
+
+	<body>
+		
+	</body>
+
+	<script type="text/javascript">		
+		var getActiveUploadObj = function() {
+			// IE上传控件
+			try {
+				return new ActiveXObject("TXFINActiveX.FINUpload");
+			} catch (e) {
+				return 'nextSuccessor';
+			}
+		}
+
+		var getFlashUploadObj = function() {
+			// Flash上传
+			// if (supportFlash()) {
+			if (false) {
+				var str = '<object type="application/x-shockwave-flash"></object>';
+				return $(str).appendTo($('body'));
+			}
+			return 'nextSuccessor';
+		}
+
+		var getFormUploadObj = function() {
+			// 表单上传
+			var str = '<input name="file" type="file" class="ui-file" />';
+			return $(str).appendTo($('body'));
+		}
+
+		Function.prototype.after = function(fn) {
+			let self = this;
+			return function() {
+				let ret = self.apply(this, arguments);
+				if (ret === 'nextSuccessor') {
+					return fn.apply(this, arguments);
+				}
+
+				return ret;
+			}
+		}
+
+		let uploadObject = getActiveUploadObj.after(getFlashUploadObj).after(getFormUploadObj);
+		console.log(uploadObject());
+	</script>
+</html>

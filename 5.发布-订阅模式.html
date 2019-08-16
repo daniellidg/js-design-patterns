@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+	<header>
+		<meta charset="utf-8">
+		<title>发布-订阅模式/观察者模式</title>
+	</header>
+
+	<body>
+		<button id="count">Click Me</button>
+		<div id="view"></div>
+	</body>
+
+	<script type="text/javascript">
+		var Event = (function() {
+			var clientList = {};
+
+			listen = function(key, fn) {
+				if (!clientList[key]) {
+					clientList[key] = [];
+				}
+				clientList[key].push(fn);
+			};
+
+			trigger = function() {
+				let key = Array.prototype.shift.call(arguments),
+				fns = clientList[key];
+				if (!fns || fns.length == 0) {
+					return false;
+				}
+
+				for (let i = 0, l = fns.length; i < l; i++) {
+					let fn = fns[i];
+					fn.apply(this, arguments);
+				}
+			};
+
+			remove = function(key, fn) {
+				let fns = clientList[key];
+				if (!fns) {
+					return false;
+				}
+
+				if (!fn) {
+					return fns && (fns.length = 0);
+				} else {
+					for (let i = 0, l = fns.length; i < l; i++) {
+						if (fns[i] === fn) {
+							fns.splice(i, 1);
+						}
+					}
+				}
+ 			};
+
+ 			return {
+ 				listen: listen,
+ 				trigger: trigger,
+ 				remove: remove
+ 			};
+		})();
+
+		Event.listen("addCount", function(count) {
+			let showDiv = document.getElementById("view");
+			showDiv.innerHTML = count;
+		});
+
+		let count = 0;
+		let btn = document.getElementById("count");
+		btn.onclick = function() {
+			Event.trigger("addCount", count++);
+		};
+	</script> 
+</html>

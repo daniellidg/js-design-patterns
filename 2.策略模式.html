@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+	<header>
+		<meta charset="utf-8">
+		<title>策略模式: 表单认证</title>
+	</header>
+
+	<body>
+		<form action="http://xxx.com/register" id="registerForm" method="post">
+			请输入用户名:<input type="text" name="userName">
+			请输入密码:<input type="text" name="password">
+			请输入手机号:<input type="text" name="phoneNum">
+			<button>提交</button>
+		</form>
+	</body>
+
+	<script type="text/javascript">
+			/*********************策略对象*********************/
+			var strategies = {
+			isNonEmpty: (value, errorMsg) => {
+				if (!value) {
+					return errorMsg;
+				}
+			},
+			minLength: (value, len, errorMsg) => {
+				if (value.length < len) {
+					return errorMsg;
+				}
+			},
+			maxLength: (value, len, errorMsg) => {
+				if (value.length > len) {
+					return errorMsg;
+				}
+			},
+			isMobile: (value, errorMsg) => {
+				if (!/(^1[3|5|8][0-9]{9}$)/.test(value)) {
+					return errorMsg;
+				}
+			}
+		};
+
+		/*********************Validator 类*********************/
+		var Validator = function() {
+			this.cache = [];
+		}
+
+		Validator.prototype.add = function(value, rules) {
+			for (let i = 0; i < rules.length; i++) {
+				let rule = rules[i];
+				let that = this;
+				// ((rule) => {
+					let strategyArr = rule.strategy.split(":");
+					that.cache.push(() => {
+						let strategy = strategyArr.shift();
+						strategyArr.unshift(value);
+						strategyArr.push(rule.errorMsg);
+
+						return strategies[strategy].apply(that, strategyArr);
+					});
+				// })(rule)
+
+			}
+		};
+
+		Validator.prototype.start = function() {
+			for (let i = 0; i < this.cache.length; i++) {
+				let validatorFun = this.cache[i];
+				let errorMsg = validatorFun();
+				if (errorMsg) {
+					return errorMsg;
+				}
+			}
+		};
+
+		/*********************客户端调用代码*********************/
+		var registerForm = document.getElementById("registerForm");
+		var validatorFun = () => {
+			var validator = new Validator();
+
+			validator.add(registerForm.userName.value, [{
+				strategy: 'isNonEmpty', errorMsg: '用户名不能为空'
+			}]);
+			
+			validator.add(registerForm.password.value, [{
+				strategy: 'isNonEmpty', errorMsg: '密码不能为空'
+			},
+			{
+				strategy: 'minLength:6', errorMsg: '密码长度不能小于6位'
+			}]);
+
+			validator.add(registerForm.phoneNum.value, [{
+				strategy: 'isNonEmpty', errorMsg: '手机号不能为空'
+			},
+			{
+				strategy: 'isMobile', errorMsg: '手机号格式不正确'
+			}]);
+
+			var errorMsg = validator.start();
+			return errorMsg;
+		}
+
+		registerForm.onsubmit = () => {
+			var errorMsg = validatorFun();
+			if (errorMsg) {
+				alert(errorMsg);
+				return false;
+			}
+		}
+	</script>
+</html>

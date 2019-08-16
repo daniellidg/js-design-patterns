@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+	<header>
+		<meta charset="utf-8">
+		<title>状态模式：状态机(模拟电灯切换)</title>
+	</header>
+
+	<body>
+		
+	</body>
+
+	<script type="text/javascript">
+		/***************************定义状态机********************************/
+		var FSM = {
+			on: {
+				onBtnPress: function() {
+					console.log("开灯");
+					this.button.innerHTML = "下一次按我是关灯";
+
+					this.curState = FSM.off;
+				}
+			},
+			off: {
+				onBtnPress: function() {
+					console.log("关灯");
+					this.button.innerHTML = "下一次按我是开灯";
+
+					this.curState = FSM.on;
+				}
+			}
+		};
+
+		/***************************定义电灯对象********************************/
+		var Light = function() {
+			this.curState = FSM.off;	// 设置默认状态
+			this.button = null;
+		};
+
+		Light.prototype.init = function() {
+			var btn = document.createElement("button"),
+				self = this;
+
+			btn.innerHTML = "已关灯";
+
+			this.button = document.body.appendChild(btn);
+			this.button.onclick = function() {
+				self.curState.onBtnPress.call(self);	// 把请求委托给FSM状态机
+			}
+		};
+
+
+		var light = new Light();
+		light.init();
+	</script>
+</html>
